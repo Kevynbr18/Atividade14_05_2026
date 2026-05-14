@@ -11,11 +11,13 @@ busca.addEventListener("input", listar);
 ordenar.addEventListener("change", listar);
 
 function salvar() {
+
     const codigo = document.getElementById("codigo").value.trim();
     const nome = document.getElementById("nome").value.trim();
     const email = document.getElementById("email").value.trim();
-    const idade = document.getElementById("idade").value;
+    const idade = Number(document.getElementById("idade").value);
 
+    // VALIDAÇÕES
     if (!codigo || !nome || !email || !idade) {
         alert("Todos os campos são obrigatórios!");
         return;
@@ -26,12 +28,26 @@ function salvar() {
         return;
     }
 
-    const usuario = {codigo,nome,email,idade};
+    // OBJETO USUÁRIO
+    const usuario = {
+        codigo,
+        nome,
+        email,
+        idade,
+        criadoEm: Date.now()
+    };
 
+    // CREATE OU UPDATE
     if (editandoIndex === null) {
+
         usuarios.push(usuario);
+
     } else {
+
+        usuario.criadoEm = usuarios[editandoIndex].criadoEm;
+
         usuarios[editandoIndex] = usuario;
+
         editandoIndex = null;
     }
 
@@ -40,35 +56,49 @@ function salvar() {
 }
 
 function listar() {
+
     lista.innerHTML = "";
+
     let usuariosFiltrados = [...usuarios];
+
     const termo = busca.value.toLowerCase();
 
+    // BUSCA
     usuariosFiltrados = usuariosFiltrados.filter(user =>
+
         user.nome.toLowerCase().includes(termo) ||
         user.email.toLowerCase().includes(termo) ||
         user.codigo.toLowerCase().includes(termo)
+
     );
 
+    // ORDENAÇÃO
     if (ordenar.value === "az") {
+
         usuariosFiltrados.sort((a, b) =>
             a.nome.localeCompare(b.nome)
         );
     }
 
     if (ordenar.value === "recente") {
+
         usuariosFiltrados.sort((a, b) =>
             b.criadoEm - a.criadoEm
         );
     }
 
     if (ordenar.value === "antigo") {
+
         usuariosFiltrados.sort((a, b) =>
             a.criadoEm - b.criadoEm
         );
     }
 
-    usuariosFiltrados.forEach((user, index) => {
+    // LISTAR
+    usuariosFiltrados.forEach((user) => {
+
+        const indexOriginal = usuarios.indexOf(user);
+
         const li = document.createElement("li");
 
         li.innerHTML = `
@@ -77,14 +107,20 @@ function listar() {
             - ${user.idade} anos
             - Código: ${user.codigo}
 
-            <button class="editar" data-index="${index}">Editar</button>
-            <button class="remover" data-index="${index}">Remover</button>
+            <button class="editar" data-index="${indexOriginal}">
+                Editar
+            </button>
+
+            <button class="remover" data-index="${indexOriginal}">
+                Remover
+            </button>
         `;
 
         lista.appendChild(li);
     });
 }
 
+// EVENTOS DOS BOTÕES
 lista.addEventListener("click", function(event) {
 
     const index = event.target.dataset.index;
@@ -112,14 +148,16 @@ function editar(index) {
 }
 
 function remover(index) {
+
     const confirmar = confirm("Tem certeza que deseja remover?");
 
     if (confirmar) {
+
         usuarios.splice(index, 1);
+
         listar();
     }
 }
-
 
 function limparCampos() {
 
